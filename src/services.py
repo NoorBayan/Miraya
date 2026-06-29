@@ -69,3 +69,66 @@ def service_analytics_dashboard(filtered_data, era_name, theme_name):
     }
     
     return render_dashboard(stats, len(filtered_data), era_name, theme_name)
+
+
+from src.html_templates import render_interaction_network
+
+def service_interaction_network(filtered_data, era_name, theme_name):
+    """
+    الخدمة الثالثة: تقوم باستخراج العلاقات الثلاثية (Triples) من الأبيات لعرضها كشبكة.
+    """
+    if not filtered_data:
+        return "<div style='text-align:center; padding:20px; color:red; font-weight:bold; background:#fadbd8; border-radius:8px; max-width:950px; margin:auto;'>⚠️ لا توجد قصائد تطابق الفلاتر المحددة. جرب تغيير العصر أو الموضوع.</div>"
+    
+    triples_list = []
+    
+    # 1. استخراج العلاقات (Triples)
+    for poem in filtered_data:
+        roles = poem.get('participants_and_roles', {}).get('primary_roles', {})
+        lit = poem.get('literary_analytics_and_review', {})
+        poem_id = poem.get('metadata', {}).get('poem_id', 'N/A')
+        
+        subject_man = roles.get('man', 'رجل (غير محدد)')
+        object_woman = roles.get('woman', 'امرأة (غير محددة)')
+        gaze = lit.get('gaze_direction')
+        
+        # فلترة العلاقات الواضحة فقط
+        if gaze and gaze not in ['None', 'N/A']:
+            triple = {
+                'poem_id': poem_id,
+                'relation': gaze
+            }
+            
+            # تحديد الفاعل والمفعول بناءً على اتجاه النظرة
+            if gaze == 'Male-to-Female':
+                triple['subject'] = subject_man
+                triple['object'] = object_woman
+            elif gaze == 'Female-to-Male':
+                triple['subject'] = object_woman
+                triple['object'] = subject_man
+            elif gaze == 'Self-Gaze':
+                # افتراضياً المتكلم يصف نفسه، نحتاج لمعرفة جنسه
+                speaker_gender = poem.get('participants_and_roles', {}).get('speaker', {}).get('gender', 'Unknown')
+                subject_name = subject_man if speaker_gender == 'Male' else object_woman
+                triple['subject'] = subject_name
+                triple['object'] = "نفسه/نفسها"
+            elif gaze == 'Mutual':
+                triple['subject'] = f"{subject_man} & {object_woman}"
+                triple['object'] = "تبادل النظرة/الفعل"
+            else:
+                continue # تخطي الحالات غير الواضحة
+                
+            triples_list.append(triple)
+
+    # 2. عرض عينة فقط إذا كانت القائمة كبيرة جداً (لمنع انهيار المتصفح)
+    total_extracted = len(triples_list)
+    sample_size = min(15, total_extracted) # عرض 15 مسار كحد أقصى للديمو
+    
+    if total_extracted == 0:
+         return "<div style='text-align:center; padding:20px; color:#856404; font-weight:bold; background:#fff3cd; border-radius:8px; max-width:950px; margin:auto;'>⚠️ لم يتم العثور على علاقات (Gaze) صريحة في هذه العينة لبناء الشبكة.</div>"
+
+    # خلط العينة لعرض أمثلة متنوعة
+    import random
+    sampled_triples = random.sample(triples_list, sample_size)
+    
+    return render_interaction_network(sampled_triples, total_extracted, era_name, theme_name)
