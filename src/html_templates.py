@@ -90,3 +90,85 @@ def render_semantic_explorer(poem, decoded_meta):
     </div>
     """
     return html
+
+
+def render_dashboard(stats, total_poems, era_name, theme_name):
+    """
+    قالب HTML لبناء لوحة تحكم إحصائية (Dashboard) تعرض تحليل الفاعلية والتشييء.
+    """
+    
+    # دالة فرعية لرسم شريط تقدم (Progress Bar)
+    def make_progress_bar(label, count, total, color):
+        if total == 0: percentage = 0
+        else: percentage = (count / total) * 100
+        
+        return f"""
+        <div style="margin-bottom: 15px;">
+            <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 5px; font-weight: bold; color: #2c3e50;">
+                <span>{label}</span>
+                <span>{count} ({percentage:.1f}%)</span>
+            </div>
+            <div style="width: 100%; background-color: #ecf0f1; border-radius: 8px; overflow: hidden; height: 18px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+                <div style="width: {percentage}%; background-color: {color}; height: 100%; border-radius: 8px; transition: width 0.5s ease-in-out;"></div>
+            </div>
+        </div>
+        """
+
+    # استخراج الأرقام من القاموس الممرر (stats)
+    obj_stats = stats.get('objectification', {})
+    agency_stats = stats.get('agency', {})
+    
+    total_obj = sum(obj_stats.values())
+    total_agency = sum(agency_stats.values())
+
+    # الألوان المعبرة عن كل فئة
+    colors_obj = {'Fragmented': '#e74c3c', 'Holistic': '#3498db', 'Ornamental': '#9b59b6', 'Sensual': '#f39c12'}
+    colors_agency = {'Speech Act': '#1abc9c', 'Emotional': '#e67e22', 'Social/Political': '#34495e'}
+
+    html = f"""
+    <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background-color: #f8f9fa; border: 1px solid #dcdde1; border-radius: 12px; padding: 25px; max-width: 950px; margin: auto; box-shadow: 0 8px 16px rgba(0,0,0,0.1);">
+        
+        <!-- Header -->
+        <div style="background: linear-gradient(135deg, #16a085, #2ecc71); color: white; padding: 20px; border-radius: 10px; margin-bottom: 25px; text-align: center;">
+            <h2 style="margin: 0; font-size: 26px;">📊 لوحة التحليل الكمي (Distant Reading Dashboard)</h2>
+            <p style="margin: 10px 0 0 0; font-size: 16px;">
+                تم تحليل <b>{total_poems:,}</b> قصيدة بناءً على: العصر [<b>{era_name}</b>] | الغرض [<b>{theme_name}</b>]
+            </p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
+            
+            <!-- Card 1: Objectification -->
+            <div style="background: white; padding: 20px; border-radius: 10px; border: 1px solid #e1e8ed; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+                <h3 style="color: #c0392b; margin-top: 0; border-bottom: 2px solid #fadbd8; padding-bottom: 10px;">
+                    👁️ أنماط التشييء (Objectification Types)
+                </h3>
+                <p style="font-size: 13px; color: #7f8c8d; margin-bottom: 20px;">إجمالي الحالات المكتشفة: {total_obj:,}</p>
+                
+                {"".join([make_progress_bar(k, v, total_obj, colors_obj.get(k, '#95a5a6')) for k, v in obj_stats.items() if k != 'None' and k != 'N/A'])}
+                
+                {f'<div style="text-align:center; padding:10px; color:#7f8c8d; font-style:italic;">لا توجد بيانات تشييء كافية في هذه العينة.</div>' if total_obj == 0 else ''}
+            </div>
+
+            <!-- Card 2: Agency Fields -->
+            <div style="background: white; padding: 20px; border-radius: 10px; border: 1px solid #e1e8ed; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+                <h3 style="color: #2980b9; margin-top: 0; border-bottom: 2px solid #d6eaf8; padding-bottom: 10px;">
+                    ⚡ مجالات الفاعلية (Agency Fields)
+                </h3>
+                <p style="font-size: 13px; color: #7f8c8d; margin-bottom: 20px;">إجمالي الحالات المكتشفة: {total_agency:,}</p>
+                
+                {"".join([make_progress_bar(k, v, total_agency, colors_agency.get(k, '#95a5a6')) for k, v in agency_stats.items() if k != 'None' and k != 'N/A'])}
+                
+                {f'<div style="text-align:center; padding:10px; color:#7f8c8d; font-style:italic;">لا توجد بيانات فاعلية كافية في هذه العينة.</div>' if total_agency == 0 else ''}
+            </div>
+            
+        </div>
+        
+        <!-- Info Footer -->
+        <div style="margin-top: 20px; background: #fff3cd; color: #856404; padding: 15px; border-radius: 8px; border-left: 5px solid #ffeeba; font-size: 14px;">
+            💡 <b>ملاحظة بحثية:</b> تتيح هذه اللوحة للباحثين قراءة الأنماط السائدة (Distant Reading) دون الحاجة لقراءة النصوص الفردية، مما يسهل رصد التغيرات التاريخية في تمثيل الجندر.
+        </div>
+    </div>
+    """
+    return html
+
