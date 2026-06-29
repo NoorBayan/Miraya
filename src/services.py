@@ -39,19 +39,18 @@ def service_semantic_explorer(filtered_data):
 
 
 from collections import Counter
+from src.html_templates import render_dashboard
 
 def service_analytics_dashboard(filtered_data, era_name, theme_name):
     """
-    الخدمة الثانية: تقوم بتجميع إحصائيات التشييء والفاعلية للعينة المحددة وإرسالها لداشبورد.
+    الخدمة الثانية: تجميع إحصائيات التشييء والفاعلية للعينة المحددة وإرسالها لداشبورد.
     """
     if not filtered_data:
-        return "<div style='text-align:center; padding:20px; color:red; font-weight:bold; background:#fadbd8; border-radius:8px;'>⚠️ لا توجد قصائد تطابق الفلاتر المحددة. جرب تغيير العصر أو الموضوع.</div>"
+        return "<div style='text-align:center; padding:20px; color:red; font-weight:bold; background:#fadbd8; border-radius:8px; max-width:950px; margin:auto;'>⚠️ لا توجد قصائد تطابق الفلاتر المحددة. جرب تغيير العصر أو الموضوع.</div>"
     
-    # 1. إعداد العدادات (Counters)
     obj_counter = Counter()
     agency_counter = Counter()
     
-    # 2. تجميع البيانات
     for poem in filtered_data:
         lit = poem.get('literary_analytics_and_review', {})
         
@@ -64,13 +63,9 @@ def service_analytics_dashboard(filtered_data, era_name, theme_name):
         if agency_type and agency_type not in ['N/A', 'None']:
             agency_counter[agency_type] += 1
 
-    # 3. ترتيب النتائج من الأعلى للأقل لسهولة القراءة
     stats = {
         'objectification': dict(obj_counter.most_common()),
         'agency': dict(agency_counter.most_common())
     }
     
-    # استدعاء قالب داشبورد (يجب استيراده في أعلى ملف services.py)
-    # تذكر إضافة: from src.html_templates import render_dashboard
-    from src.html_templates import render_dashboard
     return render_dashboard(stats, len(filtered_data), era_name, theme_name)
