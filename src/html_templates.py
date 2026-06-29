@@ -157,3 +157,79 @@ def render_dashboard(stats, total_poems, era_name, theme_name):
     </div>
     """
     return html
+
+def render_interaction_network(triples_data, total_extracted, era_name, theme_name):
+    """
+    قالب HTML لبناء جدول شبكي (Network Viewer) يعرض العلاقات الدلالية
+    بين المشاركين في القصيدة (Subject -> Gaze/Action -> Object).
+    """
+    
+    # تنسيق رأس اللوحة
+    html = f"""
+    <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background-color: #f8f9fa; border: 1px solid #dcdde1; border-radius: 12px; padding: 25px; max-width: 950px; margin: auto; box-shadow: 0 8px 16px rgba(0,0,0,0.1);">
+        
+        <!-- Header -->
+        <div style="background: linear-gradient(135deg, #8e44ad, #9b59b6); color: white; padding: 20px; border-radius: 10px; margin-bottom: 25px; text-align: center;">
+            <h2 style="margin: 0; font-size: 26px;">🕸️ شبكة التفاعلات والنظرة (Interaction & Gaze Network)</h2>
+            <p style="margin: 10px 0 0 0; font-size: 15px;">
+                تم استخراج <b>{total_extracted:,}</b> مسار علائقي (Triple) بناءً على: العصر [<b>{era_name}</b>] | الغرض [<b>{theme_name}</b>]
+            </p>
+        </div>
+        
+        <div style="background: white; border-radius: 10px; border: 1px solid #e1e8ed; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+            <table style="width: 100%; border-collapse: collapse; text-align: center;">
+                <thead>
+                    <tr style="background-color: #34495e; color: white;">
+                        <th style="padding: 12px; font-size: 16px; width: 25%;">الفاعل (Subject Node)</th>
+                        <th style="padding: 12px; font-size: 16px; width: 10%;"></th>
+                        <th style="padding: 12px; font-size: 16px; width: 30%;">العلاقة الدلالية (Edge)</th>
+                        <th style="padding: 12px; font-size: 16px; width: 10%;"></th>
+                        <th style="padding: 12px; font-size: 16px; width: 25%;">المتلقي (Object Node)</th>
+                    </tr>
+                </thead>
+                <tbody>
+    """
+
+    # تنسيق صفوف الجدول (Triples)
+    for idx, t in enumerate(triples_data):
+        bg_color = "#f9f9f9" if idx % 2 == 0 else "#ffffff"
+        
+        # ألوان للتمييز بناءً على اتجاه النظرة أو الفاعل
+        edge_color = "#2c3e50"
+        edge_bg = "#ecf0f1"
+        if t['relation'] == 'Male-to-Female':
+            edge_color = "#c0392b"
+            edge_bg = "#fadbd8"
+        elif t['relation'] == 'Female-to-Male':
+            edge_color = "#2980b9"
+            edge_bg = "#d6eaf8"
+        elif t['relation'] == 'Self-Gaze':
+            edge_color = "#27ae60"
+            edge_bg = "#d4efdf"
+            
+        html += f"""
+                <tr style="background-color: {bg_color}; border-bottom: 1px solid #ecf0f1;">
+                    <td style="padding: 15px; font-weight: bold; color: #2c3e50;">{t['subject']}</td>
+                    <td style="padding: 15px; color: #bdc3c7;">←</td>
+                    <td style="padding: 15px;">
+                        <span style="background-color: {edge_bg}; color: {edge_color}; padding: 5px 15px; border-radius: 20px; font-size: 13px; font-weight: bold; border: 1px solid {edge_color}40;">
+                            {t['relation']}
+                        </span>
+                        <div style="font-size: 11px; color: #7f8c8d; margin-top: 5px;">( ID: {t['poem_id']} )</div>
+                    </td>
+                    <td style="padding: 15px; color: #bdc3c7;">→</td>
+                    <td style="padding: 15px; font-weight: bold; color: #2c3e50;">{t['object']}</td>
+                </tr>
+        """
+        
+    html += """
+                </tbody>
+            </table>
+        </div>
+        
+        <div style="margin-top: 20px; background: #e8f8f5; color: #117a65; padding: 15px; border-radius: 8px; border-left: 5px solid #1abc9c; font-size: 14px;">
+            💡 <b>ملاحظة بحثية:</b> يعكس هذا الجدول كيفية تحويل النص الشعري الحر إلى (Knowledge Graph). كل سطر يمثل مساراً منطقياً قابلاً للقراءة الآلية (Machine-Actionable Semantic Triple).
+        </div>
+    </div>
+    """
+    return html
