@@ -1,4 +1,4 @@
-# 🪞 Miraya: Semantic and Gender Ontology of Classical Arabic Poetry
+# 🏛️ Miraya: Semantic and Gender Ontology of Classical Arabic Poetry
 
 Welcome to **Miraya**, the most comprehensive structured semantic dataset and knowledge graph for the study of Classical Arabic Poetry. Moving beyond traditional surface-level Natural Language Processing (NLP) tasks such as sentiment analysis or meter classification, **Miraya** provides a deep semantic representation that deconstructs narrative structures, semantic roles, and gender representations within poetic texts.
 
@@ -82,18 +82,31 @@ Designed for scholars of Middle Eastern literature and gender studies, this data
 
 ---
 
-## 🚀 Exploratory Tools & Services
+## 🚀 Exploratory Tools & Interactive Services
 
-To facilitate immediate engagement with the dataset, we have provided an accompanying Jupyter Notebook featuring four ready-to-use analytical services that bridge computational logic with literary criticism:
+To facilitate immediate engagement with the dataset, we provide an interactive [Jupyter Notebook environment](https://colab.research.google.com/drive/1oc1GRgHhFK6WDFBn6F6cQSiQuYT_-X8U?usp=sharing) featuring four ready-to-use analytical services. These tools bridge computational extraction with advanced literary criticism, offering Digital Humanities scholars intuitive access to deep semantic structures.
 
-1. **Semantic Poem Explorer:**  
-   Filter by era, genre, or poet gender. The system retrieves matching verses with interactive HTML highlighting, instantly visualizing the main event, the agent, the patient, and the objectification type directly on the Arabic text.
-2. **Agency & Objectification Dashboard:**  
-   A powerful Distant Reading tool. Select a specific literary context to generate visual progress bars comparing male vs. female agency (Active vs. Passive) and the dominant modes of objectification within that era.
-3. **Interaction & Gaze Network Viewer:**  
-   Translates the poetic verse into a Knowledge Graph matrix (Subject → Gaze/Action → Object). This exposes the underlying relational network, clarifying exactly who directs the gaze and who receives it.
-4. **Diachronic Trend Tracker:**  
-   Select a critical phenomenon (e.g., *Sensual Objectification*) to instantly generate temporal visualizations showing how this literary device evolved, peaked, or declined across the 12 classical Arabic eras.
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1oc1GRgHhFK6WDFBn6F6cQSiQuYT_-X8U?usp=sharing)
+
+1. 🔍 **Semantic Poem Explorer**  
+   Designed for close reading, this tool allows researchers to filter verses by historical era, genre, or poet gender. It dynamically retrieves matching texts with interactive metadata, explicitly mapping out the central event, semantic roles, and implicit gender dynamics inherent in the verse.
+
+2. 📊 **Agency & Objectification Dashboard**  
+   A quantitative *Distant Reading* utility tailored for gender and discourse studies. By selecting specific literary contexts, researchers can generate instant visual dashboards that compare male versus female agency models (e.g., *Active vs. Passive*) and quantify dominant modes of physical or symbolic objectification.
+
+3. 🕸️ **Interaction & Gaze Network Viewer**  
+   Translates highly figurative poetic language into a structured Knowledge Graph matrix (`Subject → Gaze/Relation → Object`). This service exposes the underlying relational hierarchy, clarifying the directionality of the gaze and the power dynamics between entities within the narrative space.
+
+4. 📈 **Diachronic Trend Tracker**  
+   Tracks the temporal evolution of critical literary phenomena across 12 classical Arabic eras. By relying on proportional relative frequency rather than absolute counts, this tracker provides methodologically sound visualizations of how specific devices (e.g., *Sensual Objectification* or *Speech Act Agency*) emerged, peaked, and declined over centuries.
+
+<br>
+
+<div align="center">
+  <img src="https://github.com/NoorBayan/Miraya/blob/main/images/DiachronicTrendTracker.png?raw=true" alt="Diachronic Trend Tracker Demo" width="800">
+  <br>
+  <i>Screenshot: The Diachronic Trend Tracker demonstrating the temporal evolution of specific semantic structures.</i>
+</div>
 
 ---
 
