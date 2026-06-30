@@ -132,3 +132,58 @@ def service_interaction_network(filtered_data, era_name, theme_name):
     sampled_triples = random.sample(triples_list, sample_size)
     
     return render_interaction_network(sampled_triples, total_extracted, era_name, theme_name)
+
+from src.mappings import poet_era_dic
+from src.html_templates import render_diachronic_tracker
+
+def service_diachronic_tracker(full_data, target_field, target_value, phenomenon_name):
+    """
+    الخدمة الرابعة: تجمع البيانات عبر العصور ترتيباً زمنياً وتحسب التردد النسبي للظاهرة.
+    """
+    if not full_data:
+        return "لا توجد بيانات متاحة."
+
+    # 1. تهيئة قواميس الحساب بناءً على الترتيب الزمني الصارم (من 1 إلى 12)
+    # نتجاهل 0 (غير محدد)
+    era_keys = sorted([k for k in poet_era_dic.keys() if k != 0])
+    
+    era_totals = {k: 0 for k in era_keys}
+    era_phenomenon_counts = {k: 0 for k in era_keys}
+
+    # 2. المرور على البيانات وعدّ الحالات
+    for poem in full_data:
+        era_id = poem.get('metadata', {}).get('poet', {}).get('era')
+        
+        if era_id in era_totals:
+            era_totals[era_id] += 1  # زيادة المجموع الكلي لقصائد هذا العصر
+            
+            # فحص وجود الظاهرة المطلوبة
+            lit = poem.get('literary_analytics_and_review', {})
+            actual_value = lit.get(target_field)
+            
+            if actual_value == target_value:
+                era_phenomenon_counts[era_id] += 1
+
+    # 3. تجهيز قائمة النتائج النهائية المرتبة وحساب النسب
+    trend_data = []
+    max_percentage = 0.0
+
+    for era_id in era_keys:
+        total = era_totals[era_id]
+        count = era_phenomenon_counts[era_id]
+        
+        # تجنب القسمة على صفر
+        percentage = (count / total * 100) if total > 0 else 0.0
+        
+        if percentage > max_percentage:
+            max_percentage = percentage
+            
+        trend_data.append({
+            'era_name': poet_era_dic[era_id],
+            'count': count,
+            'total': total,
+            'percentage': percentage
+        })
+
+    # 4. استدعاء القالب للرسم
+    return render_diachronic_tracker(trend_data, phenomenon_name, max_percentage)
