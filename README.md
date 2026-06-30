@@ -111,7 +111,11 @@ To facilitate immediate engagement with the dataset, we provide an interactive [
 ---
 
 ## 📜 License & Citation
-[Insert your specific license here, e.g., CC BY-NC 4.0]
 
-If you utilize this dataset or its schema in your academic research, please cite the following paper:  
-`[Citation details will be added upon publication in IEEE Access]`
+This dataset is licensed under the **Creative Commons Attribution 4.0 International (CC BY 4.0)**.
+
+If you use this corpus, ontology, annotations, or any derivative work in academic research, please cite the associated publication:
+
+> Citation will be added upon publication in IEEE Access.
+
+Until then, please cite this GitHub repository.
