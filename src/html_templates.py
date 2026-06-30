@@ -233,3 +233,74 @@ def render_interaction_network(triples_data, total_extracted, era_name, theme_na
     </div>
     """
     return html
+
+def render_diachronic_tracker(trend_data, phenomenon_name, max_percentage):
+    """
+    قالب HTML لبناء مخطط زمني بياني (Timeline Bar Chart) لتتبع تطور ظاهرة عبر العصور.
+    """
+    
+    html = f"""
+    <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background-color: #f8f9fa; border: 1px solid #dcdde1; border-radius: 12px; padding: 25px; max-width: 950px; margin: auto; box-shadow: 0 8px 16px rgba(0,0,0,0.1);">
+        
+        <!-- Header -->
+        <div style="background: linear-gradient(135deg, #2980b9, #3498db); color: white; padding: 20px; border-radius: 10px; margin-bottom: 25px; text-align: center; position: relative; overflow: hidden;">
+            <h2 style="margin: 0; font-size: 26px; position: relative; z-index: 2;">📈 التتبع التاريخي للظواهر (Diachronic Trend Tracker)</h2>
+            <p style="margin: 10px 0 0 0; font-size: 16px; position: relative; z-index: 2;">
+                تتبع تطور ظاهرة: <span style="background: #f1c40f; color: #2c3e50; padding: 2px 10px; border-radius: 15px; font-weight: bold;">{phenomenon_name}</span> عبر العصور الأدبية
+            </p>
+        </div>
+
+        <!-- The Timeline Chart -->
+        <div style="background: white; padding: 25px; border-radius: 10px; border: 1px solid #e1e8ed; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+            <div style="display: flex; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; margin-bottom: 15px; font-weight: bold; color: #7f8c8d; font-size: 14px;">
+                <div style="width: 25%;">العصر الأدبي (Chronological)</div>
+                <div style="width: 60%;">التردد النسبي للظاهرة (Relative Frequency)</div>
+                <div style="width: 15%; text-align: left;">الأعداد (Count)</div>
+            </div>
+    """
+
+    # رسم الأعمدة البيانية لكل عصر
+    for era in trend_data:
+        era_name = era['era_name']
+        count = era['count']
+        total = era['total']
+        percentage = era['percentage']
+        
+        # حساب العرض النسبي للشريط (بالنسبة لأعلى قيمة ليكون الرسم متناسقاً)
+        bar_width = (percentage / max_percentage * 100) if max_percentage > 0 else 0
+        
+        # تدرج لوني يعتمد على كثافة الظاهرة (أحمر للكثيف، أزرق للقليل)
+        color = "#e74c3c" if percentage > (max_percentage * 0.7) else ("#f39c12" if percentage > (max_percentage * 0.4) else "#3498db")
+        
+        html += f"""
+            <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                <!-- Era Name -->
+                <div style="width: 25%; font-weight: bold; color: #2c3e50; font-size: 14px;">
+                    {era_name}
+                </div>
+                
+                <!-- Progress Bar -->
+                <div style="width: 60%; padding-left: 15px;">
+                    <div style="display: flex; align-items: center; height: 24px;">
+                        <div style="width: {bar_width}%; background-color: {color}; height: 100%; border-radius: 4px; transition: width 1s ease-in-out; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></div>
+                        <span style="margin-right: 10px; font-size: 13px; font-weight: bold; color: {color};">{percentage:.1f}%</span>
+                    </div>
+                </div>
+                
+                <!-- Raw Numbers -->
+                <div style="width: 15%; text-align: left; font-size: 12px; color: #95a5a6; background: #f8f9fa; padding: 4px; border-radius: 4px; border: 1px solid #ecf0f1;">
+                    {count} / {total}
+                </div>
+            </div>
+        """
+
+    html += """
+        </div>
+        
+        <!-- Research Insight -->
+        <div style="margin-top: 20px; background: #e8f6f3; color: #0e6251; padding: 15px; border-radius: 8px; border-left: 5px solid #1abc9c; font-size: 14px; line-height: 1.6;">
+            💡 <b>منهجية البحث (Methodological Note):</b> لتجنب الانحياز الإحصائي الناتج عن تفاوت عدد القصائد بين العصور (مثلاً العصر العباسي أضخم بكثير من غيره)، يعتمد هذا المخطط على <b>التردد النسبي (Percentages)</b> وليس الأعداد المطلقة. هذا يضمن قراءة علمية دقيقة لكيفية تطور الظاهرة كـ "نسبة مئوية من إجمالي الإنتاج الشعري" لكل عصر.
+        </div>
+    </div>
+    """
+    return html
