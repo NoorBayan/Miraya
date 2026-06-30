@@ -112,9 +112,9 @@ To facilitate immediate engagement with the dataset, we provide an interactive [
 
 ## 📜 License & Citation
 
-This dataset is licensed under the **Creative Commons Attribution 4.0 International (CC BY 4.0)**.
+This dataset is distributed under the **Creative Commons Attribution 4.0 International (CC BY 4.0)** License. See the [LICENSE](LICENSE) file for the complete license terms.
 
-If you use this corpus, ontology, annotations, or any derivative work in academic research, please cite the associated publication:
+If you use this corpus, ontology, annotations, schema, or any derivative work in academic research, please cite the associated publication:
 
 > Citation will be added upon publication in IEEE Access.
 
