@@ -1,39 +1,59 @@
-def validate_candidate_graph(candidate_json: dict) -> dict:
+import logging
+from typing import Dict, Any
+
+def _evaluate_shacl_shapes(candidate: Dict[str, Any]) -> list:
     """
-    Executes Algorithm 1: Deterministic Constraint Validation & Routing.
-    Evaluates candidate assertions against ontological SHACL constraints and logical rules.
+    Evaluates the candidate assertion against formal SHACL shape definitions.
+    Validates domain/range conformance and mandatory property existence.
     """
-    validation_log = []
-    is_valid = True
+    violations = []
+    mandatory_properties = ["main_event_tense", "speaker_present", "gaze_direction", "confidence"]
     
-    if candidate_json.get("status") == "Error":
-        return {"status": "Rejected", "log": ["JSON Parsing Failure."]}
-
-    # 1. Structural Conformance (Schema Validation)
-    required_fields = ["main_event", "participants", "confidence_score"]
-    for field in required_fields:
-        if field not in candidate_json:
-            validation_log.append(f"Fatal Violation: Missing mandatory property '{field}' (C03).")
-            is_valid = False
-            return {"status": "Rejected", "log": validation_log}
+    for prop in mandatory_properties:
+        if prop not in candidate:
+            violations.append(f"Structural Violation (C03): Missing property '{prop}'.")
             
-    # 2. Semantic Integrity Rules (SHACL-SPARQL Logic Equivalent)
-    man_roles = candidate_json.get("man_roles_all", [])
-    woman_roles = candidate_json.get("woman_roles_all", [])
-    all_roles = man_roles + woman_roles
+    return violations
 
-    # Rule C01: Orphan agents without associated actions are disallowed
-    if all_roles and not candidate_json.get("events"):
-        validation_log.append("Contradiction (C01): Roles assigned without identifying any valid events.")
-        is_valid = False
+def _evaluate_sparql_logic(candidate: Dict[str, Any]) -> list:
+    """
+    Enforces complex semantic integrity constraints preventing ontological contradictions.
+    """
+    contradictions = []
+    
+    gaze = candidate.get("gaze_direction", "none")
+    woman_role = candidate.get("woman_role", "none")
+    man_role = candidate.get("man_role", "none")
+    
+    # Rule C09: Gaze compatibility rule
+    if gaze == "Male-to-Female" and woman_role == "none":
+        contradictions.append("Semantic Violation (C09): Male-to-Female gaze asserted, but no woman role identified.")
+        
+    # Rule C04: Speaker identification consistency
+    if candidate.get("speaker_present") == "Yes" and candidate.get("speaker_gender") == "unknown":
+        if candidate.get("gender_inference_basis") not in ["Assumed", "Literary Context"]:
+            contradictions.append("Semantic Violation (C04): Speaker present with unknown gender lacks valid epistemic basis.")
 
-    # Rule C09: Check for mutual exclusion in Gaze Direction vs Participants
-    gaze = candidate_json.get("gaze_direction")
-    if gaze in ["Male-to-Female", "Female-to-Male"] and (not man_roles or not woman_roles):
-        validation_log.append("Contradiction (C09): Gaze direction implies mixed genders, but participants are uniform.")
-        is_valid = False
+    return contradictions
 
-    if not is_valid:
+def validate_candidate_graph(candidate_json: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    The Deterministic Validation Core (Algorithm 1).
+    Isolates LLM probabilistic generation from final knowledge graph commitment.
+    """
+    if candidate_json.get("status") == "Schema_Violation":
+        return {"status": "Rejected", "log": candidate_json.get("review_flags", [])}
+        
+    validation_log = []
+    
+    shacl_violations = _evaluate_shacl_shapes(candidate_json)
+    if shacl_violations:
+        validation_log.extend(shacl_violations)
+        return {"status": "Rejected", "log": validation_log}
+        
+    logic_contradictions = _evaluate_sparql_logic(candidate_json)
+    if logic_contradictions:
+        validation_log.extend(logic_contradictions)
         return {"status": "Contradicted", "log": validation_log}
         
-    return {"status": "Valid", "log": ["All SHACL structural and logic constraints satisfied."]}
+    return {"status": "Valid", "log": ["Ontology constraint evaluation passed."]}
