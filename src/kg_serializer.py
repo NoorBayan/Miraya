@@ -1,34 +1,42 @@
+from typing import Dict, Any
 from rdflib import Graph, URIRef, Literal, Namespace, RDF
 from rdflib.namespace import XSD
 
-def serialize_to_rdf(accepted_json: dict) -> str:
+def serialize_to_rdf(validated_json: Dict[str, Any]) -> str:
     """
-    Transforms validated semantic records into an auditable Knowledge Graph (RDF format).
-    Preserves provenance and epistemic status as formal graph properties (Section 5.5).
+    Transforms the verified JSON ontology payload into standard W3C RDF triples.
+    Supports complex graph-based querying for the Digital Humanities infrastructure.
     """
-    g = Graph()
+    graph = Graph()
     ONTO = Namespace("http://maraya.ontology.org/schema#")
     DATA = Namespace("http://maraya.ontology.org/data/")
     
-    g.bind("maraya", ONTO)
+    graph.bind("maraya", ONTO)
+    graph.bind("data", DATA)
     
-    record_id = accepted_json.get('record_id', 'unknown')
-    event_node = URIRef(DATA[f"Event_{record_id}"])
+    record_id = validated_json.get('record_id', 'unknown')
+    event_uri = URIRef(DATA[f"Event_{record_id}"])
     
-    # Core Ontology Hierarchies
-    g.add((event_node, RDF.type, ONTO.PoeticEvent))
-    g.add((event_node, ONTO.hasMainDescription, Literal(accepted_json.get("main_event", ""))))
-    g.add((event_node, ONTO.hasAgencyType, Literal(accepted_json.get("agency_type", "N/A"))))
-    g.add((event_node, ONTO.hasGazeDirection, Literal(accepted_json.get("gaze_direction", "N/A"))))
+    graph.add((event_uri, RDF.type, ONTO.PoeticEvent))
+    graph.add((event_uri, ONTO.hasTense, Literal(validated_json.get("main_event_tense", "unknown"))))
+    graph.add((event_uri, ONTO.hasMood, Literal(validated_json.get("main_event_mood", "unknown"))))
+    graph.add((event_uri, ONTO.hasAgencyType, Literal(validated_json.get("agency_type", "unknown"))))
+    graph.add((event_uri, ONTO.hasGazeDirection, Literal(validated_json.get("gaze_direction", "none"))))
     
-    # Process Relational Role Dynamics (Gender & Agency)
-    for role_obj in accepted_json.get("man_roles_all", []):
-        participant_node = URIRef(DATA[f"Participant_{hash(role_obj['entity'])}"])
-        g.add((participant_node, RDF.type, ONTO.MaleParticipant))
-        g.add((event_node, ONTO.hasParticipant, participant_node))
-        g.add((participant_node, ONTO.hasRole, Literal(role_obj['role'])))
+    woman_role = validated_json.get("woman_role", "none")
+    if woman_role != "none":
+        woman_node = URIRef(DATA[f"WomanParticipant_{record_id}"])
+        graph.add((woman_node, RDF.type, ONTO.FemaleParticipant))
+        graph.add((woman_node, ONTO.hasSemanticRole, Literal(woman_role)))
+        graph.add((event_uri, ONTO.hasParticipant, woman_node))
 
-    # Preserve Uncertainty as Epistemic Provenance
-    g.add((event_node, ONTO.hasConfidenceScore, Literal(accepted_json.get("confidence_score", 0.0), datatype=XSD.float)))
+    man_role = validated_json.get("man_role", "none")
+    if man_role != "none":
+        man_node = URIRef(DATA[f"ManParticipant_{record_id}"])
+        graph.add((man_node, RDF.type, ONTO.MaleParticipant))
+        graph.add((man_node, ONTO.hasSemanticRole, Literal(man_role)))
+        graph.add((event_uri, ONTO.hasParticipant, man_node))
+        
+    graph.add((event_uri, ONTO.hasConfidenceProfile, Literal(validated_json.get("confidence", "Low"))))
     
-    return g.serialize(format="turtle")
+    return graph.serialize(format="turtle")
