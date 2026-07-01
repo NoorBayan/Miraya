@@ -2,38 +2,37 @@ from langchain.prompts import PromptTemplate
 
 def build_ontology_prompt() -> PromptTemplate:
     """
-    Constructs the ontology-guided prompt template (Section 5.2).
-    Enforces strict vocabulary boundaries and JSON schema compliance.
+    Constructs the ontology-guided prompt template. 
+    Strictly enforces the semantic schema, vocabularies, and categorical boundaries 
+    defined in the system architecture.
     """
     template = """
-    You are an expert in Classical Arabic Literature and Ontology Engineering.
-    Analyze the following verse based on its historical and morphological context.
+    You are an expert Semantic Knowledge Engineer specializing in Classical Arabic Literature.
+    Perform a deep semantic extraction on the following verse, strictly adhering to the provided ontology.
     
     Verse: {verse_text}
-    Poet: {poet_name} (Gender: {poet_gender})
-    Era: {era}
-    Genre: {genre}
+    Context: Poet: {poet_name} | Gender: {poet_gender} | Era: {era} | Genre: {genre}
     
-    You MUST output a valid JSON matching this exact schema and ONLY use allowed ontology classes.
+    OUTPUT FORMAT: You MUST output ONLY a valid JSON object matching this exact schema. Do not generate markdown.
     
-    Schema Constraints:
-    - main_event: string (brief summary)
-    - events: array of strings (explicit and implicit verb lemmas)
-    - participants: array of strings (entities involved)
-    - speaker_gender: ["Male", "Female", "Unknown"]
-    - man_roles_all: array of objects {{"entity": string, "role": ["Agent", "Patient", "Theme", "Experiencer", "Addressee"]}}
-    - woman_roles_all: array of objects {{"entity": string, "role": ["Agent", "Patient", "Theme", "Experiencer", "Addressee"]}}
-    - agency_type: ["Speech Act", "Emotional", "Social/Political", "Domestic", "Intellectual", "N/A"]
-    - objectification_type: ["Fragmented", "Holistic", "Ornamental", "Sensual", "N/A"]
-    - gaze_direction: ["Male-to-Female", "Female-to-Male", "Mutual", "Self-Gaze", "N/A"]
-    - confidence_score: float (0.0 to 1.0)
-    - review_flags: array of strings (e.g., ["Ambiguity", "Heavy Metaphor"])
-    
-    Output JSON ONLY. No markdown wrappers, no explanations.
+    SCHEMA & ALLOWED VALUES:
+    - main_event: string (A concise summary of the primary action)
+    - main_event_tense: ["Past", "Present", "Future", "Imperative", "Timeless", "unknown"]
+    - main_event_polarity: ["Affirmative", "Negated", "Ambiguous (conditional)", "Ambiguous (interrogative)", "unknown"]
+    - main_event_mood: ["Indicative", "Imperative", "Conditional", "Subjunctive", "Jussive", "Optative", "Interrogative", "unknown"]
+    - speaker_present: ["Yes", "No", "unknown"]
+    - speaker_gender: ["Male", "Female", "unknown"]
+    - gender_inference_basis: ["Explicit Word", "Morphology", "Proper Name", "Literary Context", "Assumed", "none"]
+    - woman_role: ["Agent", "Patient", "Theme", "Experiencer", "Addressee", "none", "Other"]
+    - man_role: ["Agent", "Patient", "Theme", "Experiencer", "Addressee", "none", "Other"]
+    - objectification_type: ["Holistic", "Fragmented", "Ornamental", "Sensual", "Mutual", "none"]
+    - agency_type: ["Speech Act", "Emotional", "Social/Political", "Domestic", "Intellectual", "War", "Travel", "Mutual", "unknown"]
+    - gaze_direction: ["Male-to-Female", "Female-to-Male", "Mutual", "Self-Gaze", "Male-to-Character", "Narrator-to-Character", "none"]
+    - confidence: ["High", "Medium", "Low"]
+    - review_flags: array of strings (e.g., ["Heavy Metaphor", "Ambiguity", "Coreference Unclear"])
     """
     
-    prompt = PromptTemplate(
+    return PromptTemplate(
         input_variables=["verse_text", "poet_name", "poet_gender", "era", "genre"],
         template=template
     )
-    return prompt
